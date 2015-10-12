@@ -49,14 +49,14 @@ public class PromiseImplTests {
             onComplete.accept(true);
         }).then((taskContext, onComplete) -> {
             foo.add(5);
-            taskContext.put("data", foo);
+            taskContext.state().put("data", foo);
             onComplete.accept(true);
         }).done((taskContext) -> {
-            context.assertTrue(taskContext != null);
-            context.assertTrue(taskContext.containsKey("data"));
-            context.assertEquals(3, taskContext.getJsonArray("data").size());
-            context.assertEquals(1, taskContext.getJsonArray("data").getInteger(0));
-            context.assertEquals(5, taskContext.getJsonArray("data").getInteger(2));
+            context.assertTrue(taskContext.state() != null);
+            context.assertTrue(taskContext.state().containsKey("data"));
+            context.assertEquals(3, taskContext.state().getJsonArray("data").size());
+            context.assertEquals(1, taskContext.state().getJsonArray("data").getInteger(0));
+            context.assertEquals(5, taskContext.state().getJsonArray("data").getInteger(2));
             async.complete();
         }).eval();
     }
@@ -94,14 +94,14 @@ public class PromiseImplTests {
             });
         }, (taskContext, onComplete) -> {
             foo.add(2);
-            taskContext.put("data", foo);
+            taskContext.state().put("data", foo);
             onComplete.accept(true);
         }).done((taskContext) -> {
             context.assertTrue(taskContext != null);
-            context.assertTrue(taskContext.containsKey("data"));
-            context.assertEquals(2, taskContext.getJsonArray("data").size());
-            context.assertEquals(2, taskContext.getJsonArray("data").getInteger(0));
-            context.assertEquals(1, taskContext.getJsonArray("data").getInteger(1));
+            context.assertTrue(taskContext.state().containsKey("data"));
+            context.assertEquals(2, taskContext.state().getJsonArray("data").size());
+            context.assertEquals(2, taskContext.state().getJsonArray("data").getInteger(0));
+            context.assertEquals(1, taskContext.state().getJsonArray("data").getInteger(1));
             async.complete();
         }).eval();
     }
@@ -139,15 +139,15 @@ public class PromiseImplTests {
             });
         }, (taskContext, onComplete) -> {
             foo.add(2);
-            taskContext.put("data", foo);
+            taskContext.state().put("data", foo);
             onComplete.accept(true);
         }).done((taskContext) -> {
-            context.assertTrue(taskContext != null);
-            context.assertTrue(taskContext.containsKey("data"));
-            context.assertEquals(3, taskContext.getJsonArray("data").size());
-            context.assertEquals(1, taskContext.getJsonArray("data").getInteger(0));
-            context.assertEquals(3, taskContext.getJsonArray("data").getInteger(1));
-            context.assertEquals(2, taskContext.getJsonArray("data").getInteger(2));
+            context.assertTrue(taskContext.state() != null);
+            context.assertTrue(taskContext.state().containsKey("data"));
+            context.assertEquals(3, taskContext.state().getJsonArray("data").size());
+            context.assertEquals(1, taskContext.state().getJsonArray("data").getInteger(0));
+            context.assertEquals(3, taskContext.state().getJsonArray("data").getInteger(1));
+            context.assertEquals(2, taskContext.state().getJsonArray("data").getInteger(2));
             async.complete();
         }).eval();
     }
@@ -159,15 +159,15 @@ public class PromiseImplTests {
         Async async = context.async();
 
         factory.createSerial((taskContext, onComplete) -> {
-            taskContext.put("reason", "something bad");
+            taskContext.state().put("reason", "something bad");
             onComplete.accept(false);
         }, (taskContext, onComplete) -> {
             context.fail("This should never be reached");
         }).done((taskContext) -> {
             context.fail("shouldn't call done on failure");
         }).except(taskContext -> {
-            context.assertTrue(taskContext != null);
-            context.assertTrue(taskContext.containsKey("reason"));
+            context.assertTrue(taskContext.state() != null);
+            context.assertTrue(taskContext.state().containsKey("reason"));
             async.complete();
         }).eval();
     }
@@ -186,9 +186,9 @@ public class PromiseImplTests {
             context.fail("shouldn't call done on failure");
         }).timeout(1000)
         .except(taskContext -> {
-            context.assertTrue(taskContext != null);
-            context.assertTrue(taskContext.containsKey(Promise.CONTEXT_FAILURE_KEY));
-            context.assertTrue(taskContext.getString(Promise.CONTEXT_FAILURE_KEY).indexOf("timed out") != -1);
+            context.assertTrue(taskContext.state() != null);
+            context.assertTrue(taskContext.state().containsKey(Promise.CONTEXT_FAILURE_KEY));
+            context.assertTrue(taskContext.state().getString(Promise.CONTEXT_FAILURE_KEY).indexOf("timed out") != -1);
             async.complete();
         }).eval();
     }
@@ -233,9 +233,10 @@ public class PromiseImplTests {
         }).done((taskContext) -> {
             context.fail("shouldn't call done on failure");
         }).except((taskContext) -> {
-            context.assertTrue(taskContext != null);
-            context.assertTrue(taskContext.containsKey(Promise.CONTEXT_FAILURE_KEY));
-            context.assertTrue(taskContext.getString(Promise.CONTEXT_FAILURE_KEY).indexOf("RuntimeException") != -1);
+            context.assertTrue(taskContext.error() instanceof RuntimeException);
+            context.assertTrue(taskContext.state() != null);
+            context.assertTrue(taskContext.state().containsKey(Promise.CONTEXT_FAILURE_KEY));
+            context.assertTrue(taskContext.state().getString(Promise.CONTEXT_FAILURE_KEY).indexOf("RuntimeException") != -1);
             async.complete();
         }).eval();
     }

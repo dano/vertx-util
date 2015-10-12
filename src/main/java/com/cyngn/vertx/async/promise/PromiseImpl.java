@@ -1,6 +1,7 @@
 package com.cyngn.vertx.async.promise;
 
 import com.cyngn.vertx.async.Latch;
+import com.cyngn.vertx.async.ChainContext;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
@@ -22,9 +23,9 @@ public class PromiseImpl implements Promise {
     private boolean done;
     private boolean failed;
     private Vertx vertx;
-    private Consumer<JsonObject> onFailure;
-    private Consumer<JsonObject> onComplete;
-    private JsonObject context;
+    private Consumer<ChainContext> onFailure;
+    private Consumer<ChainContext> onComplete;
+    private ChainContext context;
     private Long timerId;
     private AtomicBoolean evaluated;
 
@@ -33,7 +34,7 @@ public class PromiseImpl implements Promise {
         this.vertx = vertx;
         pos = 0;
         done = failed = false;
-        context = new JsonObject();
+        context = new ChainContext();
         actions = new ArrayList<>();
         evaluated = new AtomicBoolean(false);
     }
@@ -86,7 +87,8 @@ public class PromiseImpl implements Promise {
                     }
                 });
             } catch (Exception ex) {
-                context.put(CONTEXT_FAILURE_KEY, ex.toString());
+                context.state().put(CONTEXT_FAILURE_KEY, ex.toString());
+                context.fail(ex);
                 fail();
             }
         }
@@ -144,7 +146,7 @@ public class PromiseImpl implements Promise {
     }
 
     @Override
-    public Promise done(Consumer<JsonObject> action) {
+    public Promise done(Consumer<ChainContext> action) {
         onComplete = action;
         return this;
     }
@@ -180,7 +182,8 @@ public class PromiseImpl implements Promise {
     private void cancel() {
         timerId = null;
         if(!done) {
-            context.put(CONTEXT_FAILURE_KEY, "promise timed out");
+            context.state().put(CONTEXT_FAILURE_KEY, "promise timed out");
+            context.fail(new Exception("Promise timed out"));
             fail();
         }
     }
@@ -196,7 +199,7 @@ public class PromiseImpl implements Promise {
     }
 
     @Override
-    public Promise except(Consumer<JsonObject> onFailure) {
+    public Promise except(Consumer<ChainContext> onFailure) {
         this.onFailure = onFailure;
         return this;
     }

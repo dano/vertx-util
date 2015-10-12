@@ -3,6 +3,7 @@ package com.cyngn.vertx.async.promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
+import com.cyngn.vertx.async.ChainContext;
 import java.util.function.Consumer;
 
 /**
@@ -44,14 +45,14 @@ public interface Promise {
      * @param onFailure the callback to call on failure
      * @return the promise representing the actions
      */
-    Promise except(Consumer<JsonObject> onFailure);
+    Promise except(Consumer<ChainContext> onFailure);
 
     /**
      * The callback to call when all promise actions are done. This will only be called if there are no failures.
      * @param onComplete the callback to hit when the promise is complete
      * @return the promise representing the actions
      */
-    Promise done(Consumer<JsonObject> onComplete);
+    Promise done(Consumer<ChainContext> onComplete);
 
     /**
      * A timeout to set on the promise.

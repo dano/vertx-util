@@ -1,5 +1,6 @@
 package com.cyngn.vertx.async.promise;
 
+import com.cyngn.vertx.async.ChainContext;
 import io.vertx.core.json.JsonObject;
 
 import java.util.function.Consumer;
@@ -18,6 +19,6 @@ public interface  PromiseAction {
      * @param onResult the callback that collects the result of any given PromiseAction necessary for
      *                 continuing or completing the chain of actions in a promise.
      */
-    void execute(JsonObject context, Consumer<Boolean> onResult);
+    void execute(ChainContext context, Consumer<Boolean> onResult);
 }
 
